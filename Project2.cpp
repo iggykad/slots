@@ -1,6 +1,5 @@
-/*
-this program currently has 1 winning value, 21 which adds 10 credits
-
+/**
+* this program currently has 1 winning value, 21 which adds 10 credits
 */
 
 #include <iostream>
@@ -9,24 +8,15 @@ this program currently has 1 winning value, 21 which adds 10 credits
 #include <thread>
 #include <Windows.h>
 
-
-
-
-void setColor(int color)
-{
+void setColor(int color) {
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
-
-void resetColor()
-{
+void resetColor() {
 	setColor(7);
 }
 
-
-void runSlot(int& credits)
-
-{
+void runSlot(int& credits) {
 	using namespace std::chrono;
 	srand(static_cast<unsigned int>(time(0)));//seed is 0 seconds
 
@@ -76,7 +66,6 @@ void runSlot(int& credits)
 
 			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
 		}
-
 		if (num1 == 7) {
 			credits += 75;
 			setColor(2);
@@ -102,17 +91,13 @@ void runSlot(int& credits)
 			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
 		}
 
-
-
 		Beep(550, 75);
 		std::this_thread::sleep_for(std::chrono::milliseconds(220));
 	}
 
 }
 
-int askGamble(int& credits)
-
-{
+int askGamble(int& credits) {
 	std::cout << "\nCredits: " << credits << "\n\nHit button? (y/n)\n";
 	std::string x;
 	std::cin >> x;
@@ -120,7 +105,6 @@ int askGamble(int& credits)
 	if (x == "bonus") //secret code 
 	{
 		using namespace std::chrono_literals;
-
 
 		credits += 300;
 		std::this_thread::sleep_for(std::chrono::milliseconds(220));
@@ -137,7 +121,6 @@ int askGamble(int& credits)
 		Beep(932, 90);
 
 		return 2;
-
 	}
 
 	if (x == "y")
@@ -161,7 +144,6 @@ int askGamble(int& credits)
 		std::cout << "\nCome again.\n";
 		Beep(554, 150); Beep(440, 150); Beep(370, 150); Beep(586, 150); //melody that plays upon "n" press, meaning the exit of the program
 		return 0;
-
 	}
 }
 
