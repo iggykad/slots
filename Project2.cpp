@@ -1,16 +1,9 @@
-/*
-this program currently has 1 winning value, 21 which adds 10 credits
-
-*/
-
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
 #include <thread>
 #include <Windows.h>
-
-
-
+#include <vector>
 
 void setColor(int color)
 {
@@ -30,10 +23,15 @@ void runSlot(int& credits)
 	using namespace std::chrono;
 	srand(static_cast<unsigned int>(time(0)));//seed is 0 seconds
 
-	for (int i = 0; i < 3; i++) {
+
+	for (int i = 0; i < 3; i++) 
+	{
 		int num1 = rand() % 22;
 		int num2 = rand() % 22;
 		int num3 = rand() % 22;
+
+		Beep(550, 75);
+		std::this_thread::sleep_for(std::chrono::milliseconds(220));
 
 		std::cout << "[";
 		setColor(10);
@@ -51,61 +49,33 @@ void runSlot(int& credits)
 		resetColor();
 		std::cout << "]\n\n";
 
+		//change from 52-103 to a vector array
 
-		if (num1 == 21) {
-			credits += 10;
-			setColor(2);
-			std::cout << "21! +10 credits\n\n";
-			resetColor();
+		std::vector<int>nums{ num1, num2, num3 };
+		int twenty_one = 21;
+		int seven = 7;
 
-			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-		}
-		if (num2 == 21) {
-			credits += 10;
-			setColor(2);
-			std::cout << "21! +10 credits\n\n";
-			resetColor();
+		for (int i : nums)
+		{
+			if (i == twenty_one)
+			{
+				credits += 10;
+				setColor(2);
+				std::cout << "21! +10 credits\n\n";
+				resetColor();
+				Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
+			}
 
-			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-		}
-		if (num3 == 21) {
-			credits += 10;
-			setColor(2);
-			std::cout << "21! +10 credits\n\n";
-			resetColor();
-
-			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-		}
-
-		if (num1 == 7) {
-			credits += 75;
-			setColor(2);
-			std::cout << "7! +75 credits\n\n";
-			resetColor();
-
-			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-		}
-		if (num2 == 7) {
-			credits += 75;
-			setColor(2);
-			std::cout << "7! +75 credits\n\n";
-			resetColor();
-
-			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-		}
-		if (num3 == 7) {
-			credits += 75;
-			setColor(2);
-			std::cout << "7! +75 credits\n\n";
-			resetColor();
-
-			Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
+			if (i == seven)
+			{
+				credits += 75;
+				setColor(2);
+				std::cout << "7! +75 credits\n\n";
+				resetColor();
+				Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
+			}
 		}
 
-
-
-		Beep(550, 75);
-		std::this_thread::sleep_for(std::chrono::milliseconds(220));
 	}
 
 }
