@@ -10,25 +10,25 @@ void setColor(int color)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
-
 void resetColor()
 {
 	setColor(7);
 }
 
-
 void runSlot(int& credits)
-
 {
 	using namespace std::chrono;
 	srand(static_cast<unsigned int>(time(0)));//seed is 0 seconds
 
-
 	for (int i = 0; i < 3; i++) 
 	{
-		int num1 = rand() % 22;
+		int num1 = rand() % 22; // CHANGE ALL THREE BACK TO 22
 		int num2 = rand() % 22;
 		int num3 = rand() % 22;
+
+		std::vector<int>nums{ num1, num2, num3 };
+		int twenty_one = 21;
+		int seven = 7;
 
 		Beep(550, 75);
 		std::this_thread::sleep_for(std::chrono::milliseconds(220));
@@ -51,10 +51,6 @@ void runSlot(int& credits)
 
 		//change from 52-103 to a vector array
 
-		std::vector<int>nums{ num1, num2, num3 };
-		int twenty_one = 21;
-		int seven = 7;
-
 		for (int i : nums)
 		{
 			if (i == twenty_one)
@@ -74,14 +70,21 @@ void runSlot(int& credits)
 				resetColor();
 				Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
 			}
+
+			if (num1 == num2 && num2 == num3 && num3 == num1)
+			{
+				credits += 1000;
+				setColor(2);
+				std::cout << "Jackpot! +1000 credits\n\n";
+				resetColor();
+				Beep(233, 125); Beep(294, 125); Beep(348, 125); Beep(466, 125); Beep(392, 125); Beep(348, 125); Beep(586, 125); Beep(698, 125); Beep(496, 125); Beep(466, 125);
+			}
+
 		}
-
 	}
-
 }
 
 int askGamble(int& credits)
-
 {
 	std::cout << "\nCredits: " << credits << "\n\nHit button? (y/n)\n";
 	std::string x;
@@ -90,7 +93,6 @@ int askGamble(int& credits)
 	if (x == "bonus") //secret code 
 	{
 		using namespace std::chrono_literals;
-
 
 		credits += 300;
 		std::this_thread::sleep_for(std::chrono::milliseconds(220));
@@ -107,7 +109,6 @@ int askGamble(int& credits)
 		Beep(932, 90);
 
 		return 2;
-
 	}
 
 	if (x == "y")
@@ -131,11 +132,11 @@ int askGamble(int& credits)
 		std::cout << "\nCome again.\n";
 		Beep(554, 150); Beep(440, 150); Beep(370, 150); Beep(586, 150); //melody that plays upon "n" press, meaning the exit of the program
 		return 0;
-
 	}
 }
 
-int main() {
+int main()
+{
 	int credits = 10;
 
 	std::cout << "\nWelcome to the slots!\n";
