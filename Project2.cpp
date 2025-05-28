@@ -130,7 +130,11 @@ int askGamble(int& credits)
 		Beep(932, 90);
 		Beep(466, 70);
 		Beep(932, 90);
-		Beep(466, 200);
+		Sleep(300);
+		Beep(466, 70);
+		Beep(932, 90);
+		Beep(466, 70);
+		Beep(932, 90);
 
 		return 2;
 
