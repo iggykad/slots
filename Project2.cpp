@@ -2,8 +2,10 @@
 #include <cstdlib>
 #include <chrono>
 #include <thread>
-#include <Windows.h>
+#include <Windows.h> //to be removed, replaced by sfml audio
 #include <vector>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 void setColor(int color)
 {
@@ -22,13 +24,23 @@ void runSlot(int& credits)
 
 	for (int i = 0; i < 3; i++) 
 	{
-		int num1 = rand() % 22; // CHANGE ALL THREE BACK TO 22
+		int num1 = rand() % 22;
 		int num2 = rand() % 22;
 		int num3 = rand() % 22;
 
 		std::vector<int>nums{ num1, num2, num3 };
 		int twenty_one = 21;
 		int seven = 7;
+
+		if (num1 == num2 && num2 == num3 && num3 == num1)
+		{
+			credits += 1000;
+			setColor(2);
+			std::cout << "Jackpot! +1000 credits\n\n";
+			resetColor();
+			Beep(233, 100); Beep(294, 100); Beep(348, 100); Beep(466, 100); Beep(392, 100); Beep(348, 100); Beep(586, 100); Beep(698, 100); Beep(523, 100); Beep(455, 250);
+			Sleep(200);
+		}
 
 		Beep(550, 75);
 		std::this_thread::sleep_for(std::chrono::milliseconds(220));
@@ -49,8 +61,6 @@ void runSlot(int& credits)
 		resetColor();
 		std::cout << "]\n\n";
 
-		//change from 52-103 to a vector array
-
 		for (int i : nums)
 		{
 			if (i == twenty_one)
@@ -70,16 +80,6 @@ void runSlot(int& credits)
 				resetColor();
 				Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
 			}
-
-			if (num1 == num2 && num2 == num3 && num3 == num1)
-			{
-				credits += 1000;
-				setColor(2);
-				std::cout << "Jackpot! +1000 credits\n\n";
-				resetColor();
-				Beep(233, 125); Beep(294, 125); Beep(348, 125); Beep(466, 125); Beep(392, 125); Beep(348, 125); Beep(586, 125); Beep(698, 125); Beep(496, 125); Beep(466, 125);
-			}
-
 		}
 	}
 }
@@ -137,11 +137,15 @@ int askGamble(int& credits)
 
 int main()
 {
-	int credits = 10;
 
-	std::cout << "\nWelcome to the slots!\n";
-	std::cout << "\nIf you hit 21, you get 10 credits. The secret code will also give you 300 extra credits.\n\n";
-	std::cout << "If you hit 7, you get 75 credits\n";
+	int credits = 50;
+
+	std::cout << "Welcome to the slots!\n";
+	std::cout << "=========================================================================================\n";
+	std::cout << "If you hit 21, you get 10 credits. The secret code will also give you 300 extra credits.";
+	std::cout << "\nIf you hit 7, you get 75 credits";
+	std::cout << "\nIf you get 3 of the same numbers, you get 1000 credits.\n";
+	std::cout << "=========================================================================================\n";
 	Beep(147, 110); Beep(185, 110); Beep(220, 110); Beep(277, 110); Beep(294, 110);
 
 	while (credits > 0) {
