@@ -1,165 +1,97 @@
-#include <iostream>
+#include <raylib.h>
 #include <cstdlib>
-#include <chrono>
-#include <thread>
-#include <Windows.h> //to be removed, replaced by sfml audio
+#include <ctime>
 #include <vector>
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
+#include <string>
 
-void setColor(int color)
-{
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+int credits = 50;
+bool spinning = false;
+std::vector<int> slotValues(3);
+std::string message = "";
+
+Sound credit_sound;
+Sound jackpot;
+
+void runSlot(int& credits) {
+
+    slotValues[0] = rand() % 22;
+    slotValues[1] = rand() % 22;
+    slotValues[2] = rand() % 22;
+
+    message = "";
+
+    if (slotValues[0] == slotValues[1] && slotValues[1] == slotValues[2]) {
+        credits += 1000;
+        message = "Jackpot! +1000 credits";
+        PlaySound(jackpot);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (slotValues[i] == 21) {
+            credits += 10;
+            message = "21! +10 credits";
+            PlaySound(credit_sound);
+            
+        }
+        else if (slotValues[i] == 7) {
+            credits += 75;
+            message = "7! +75 credits";
+            PlaySound(credit_sound);
+        }
+    }
 }
 
-void resetColor()
+
+
+
+int main() 
 {
-	setColor(7);
-}
+    InitWindow(800, 600, "Slot Machine");
+    InitAudioDevice();
+    credit_sound = LoadSound("credits.mp3");
+    jackpot = LoadSound("jackpot.mp3");
+    SetTargetFPS(60);
+    srand(static_cast<unsigned int>(time(0)));
 
-void runSlot(int& credits)
-{
-	using namespace std::chrono;
-	srand(static_cast<unsigned int>(time(0)));//seed is 0 seconds
+    while (!WindowShouldClose()) 
+    {
+    
+        if (IsKeyPressed(KEY_SPACE) && credits >= 5) {
+            credits -= 5;
+            runSlot(credits);
+        }
 
-	for (int i = 0; i < 3; i++) 
-	{
-		int num1 = rand() % 22;
-		int num2 = rand() % 22;
-		int num3 = rand() % 22;
+        BeginDrawing();
+        ClearBackground(BLACK);
 
-		std::vector<int>nums{ num1, num2, num3 };
-		int twenty_one = 21;
-		int seven = 7;
+        DrawText("Welcome to the slots!", 200, 20, 30, RED);
 
-		if (num1 == num2 && num2 == num3 && num3 == num1)
-		{
-			credits += 1000;
-			setColor(2);
-			std::cout << "Jackpot! +1000 credits\n\n";
-			resetColor();
-			Beep(233, 100); Beep(294, 100); Beep(348, 100); Beep(466, 100); Beep(392, 100); Beep(348, 100); Beep(586, 100); Beep(698, 100); Beep(523, 100); Beep(455, 250);
-			Sleep(200);
-		}
+        DrawText("Rules:", 20, 60, 20, WHITE);
+        DrawText("- Hit 21 = +10 credits", 20, 90, 18, WHITE);
+        DrawText("- Hit 7  = +75 credits", 20, 110, 18, WHITE);
+        DrawText("- 3 of a kind = +1000 credits", 20, 130, 18, WHITE);
+        DrawText("- Secret code: 'bonus'", 20, 150, 18, WHITE);
 
-		Beep(550, 75);
-		std::this_thread::sleep_for(std::chrono::milliseconds(220));
+        DrawText(TextFormat("Credits: %d", credits), 20, 300, 24, YELLOW);
 
-		std::cout << "[";
-		setColor(10);
-		std::cout << num1;
-		resetColor();
+        for (int i = 0; i < 3; i++) {
+            int x = 300 + i * 80;
+            DrawText(TextFormat("%d", slotValues[i]), x, 280, 40, GREEN);
+        }
 
-		std::cout << "] [";
-		setColor(12);
-		std::cout << num2;
-		resetColor();
+        DrawText("Press [SPACE] to Spin", 200, 500, 24, SKYBLUE);
 
-		std::cout << "] [";
-		setColor(9);
-		std::cout << num3;
-		resetColor();
-		std::cout << "]\n\n";
+        if (!message.empty()) {
+            DrawText(message.c_str(), 250, 400, 20, GOLD);
+        }
 
-		for (int i : nums)
-		{
-			if (i == twenty_one)
-			{
-				credits += 10;
-				setColor(2);
-				std::cout << "21! +10 credits\n\n";
-				resetColor();
-				Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-			}
+        EndDrawing();
+    }
 
-			if (i == seven)
-			{
-				credits += 75;
-				setColor(2);
-				std::cout << "7! +75 credits\n\n";
-				resetColor();
-				Beep(1567, 90); Beep(1174, 90); Beep(1567, 90); Beep(1760, 90);
-			}
-		}
-	}
-}
+    UnloadSound(credit_sound);
+    UnloadSound(jackpot);
+    CloseAudioDevice();
+    CloseWindow();
 
-int askGamble(int& credits)
-{
-	std::cout << "\nCredits: " << credits << "\n\nHit button? (y/n)\n";
-	std::string x;
-	std::cin >> x;
-
-	if (x == "bonus") //secret code 
-	{
-		using namespace std::chrono_literals;
-
-		credits += 300;
-		std::this_thread::sleep_for(std::chrono::milliseconds(220));
-		std::cout << "\nCheat code used. +300 credits.\n\n";
-
-		Beep(466, 70);
-		Beep(932, 90);
-		Beep(466, 70);
-		Beep(932, 90);
-		Sleep(300);
-		Beep(466, 70);
-		Beep(932, 90);
-		Beep(466, 70);
-		Beep(932, 90);
-
-		return 2;
-	}
-
-	if (x == "y")
-	{
-		std::cout << "\n";
-
-		for (int i = 0; i < 3; i++) {
-			setColor(9 + i);
-			std::cout << "Spinning...";
-			resetColor();
-			std::cout << "\r";
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
-		std::cout << "\n\n";
-
-		return 1;
-	}
-
-	if (x == "n") {
-
-		std::cout << "\nCome again.\n";
-		Beep(554, 150); Beep(440, 150); Beep(370, 150); Beep(586, 150); //melody that plays upon "n" press, meaning the exit of the program
-		return 0;
-	}
-}
-
-int main()
-{
-
-	int credits = 50;
-
-	std::cout << "Welcome to the slots!\n";
-	std::cout << "=========================================================================================\n";
-	std::cout << "If you hit 21, you get 10 credits. The secret code will also give you 300 extra credits.";
-	std::cout << "\nIf you hit 7, you get 75 credits";
-	std::cout << "\nIf you get 3 of the same numbers, you get 1000 credits.\n";
-	std::cout << "=========================================================================================\n";
-	Beep(147, 110); Beep(185, 110); Beep(220, 110); Beep(277, 110); Beep(294, 110);
-
-	while (credits > 0) {
-		int result = askGamble(credits);
-
-		if (result == 1) {
-			credits -= 5;
-			runSlot(credits);
-		}
-		else if (result == 0) {
-			return 0;
-		}
-	}
-
-	std::cout << "\nNo credits left.\n";
-	return 0;
+    return 0;
 }
