@@ -20,7 +20,7 @@ void runSlot(int& credits)
 
     message = "";
 
- /*   if (slotValues[0] == slotValues[1] && slotValues[1] == slotValues[2]) {
+    if (slotValues[0] == slotValues[1] && slotValues[1] == slotValues[2]) {
         credits += 1000;
         message = "Jackpot! +1000 credits";
         PlaySound(jackpot);
@@ -37,7 +37,7 @@ void runSlot(int& credits)
             message = "7! +75 credits";
             PlaySound(credit_sound);
         }
-    }*/
+    }
 }
 
 int main() 
@@ -52,10 +52,8 @@ int main()
     while (!WindowShouldClose()) //check if KEY_ESCAPE pressed, windows close icon clicked
     {
 
-
         BeginDrawing();
         ClearBackground(BLACK);
-
         DrawText("Welcome to the slots!", 200, 20, 30, RED);
 
         if (IsKeyPressed(KEY_SPACE) && credits >= 5) {
@@ -72,7 +70,6 @@ int main()
         DrawText("- Hit 7  = +75 credits", 20, 110, 18, WHITE);
         DrawText("- 3 of a kind = +1000 credits", 20, 130, 18, WHITE);
         DrawText("- Secret code: 'bonus'", 20, 150, 18, WHITE);
-
         DrawText(TextFormat("Credits: %d", credits), 20, 300, 24, YELLOW);
 
         for (int i = 0; i < 3; i++) {
