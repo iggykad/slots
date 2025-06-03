@@ -55,11 +55,11 @@ int main()
 {
     InitWindow(800, 600, "Slot Machine");
     InitAudioDevice();
-    twenty_one = LoadSound("twentyone.mp3");
-    credit_sound = LoadSound("credits.mp3");
-    jackpot = LoadSound("jackpot.mp3");
-    pause_music = LoadSound("pause.mp3");
-    machine_spin = LoadSound("spin.mp3");
+    twenty_one = LoadSound("assets/twentyone.mp3");
+    credit_sound = LoadSound("assets/credits.mp3");
+    jackpot = LoadSound("assets/jackpot.mp3");
+    pause_music = LoadSound("assets/pause.mp3");
+    machine_spin = LoadSound("assets/spin.mp3");
     SetTargetFPS(60);
     srand(static_cast<unsigned int>(time(0))); //starting value 0, this seeds rand and helps generate random numbers. supposedly not efficient but i do not care right now
 
