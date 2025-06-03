@@ -10,7 +10,6 @@ int credits = 50;
 bool spinning = false;
 std::vector<int> slotValues(3);
 std::string message = "";
-
 Sound credit_sound;
 Sound jackpot;
 Sound twenty_one;
@@ -24,8 +23,6 @@ void runSlot(int& credits)
     slotValues[2] = rand() % 22;
 
     message = "";
-
-
 
     if (slotValues[0] == slotValues[1] && slotValues[1] == slotValues[2]) {
         credits += 1000;
@@ -50,6 +47,7 @@ void runSlot(int& credits)
 }
 
 bool Paused = false;
+bool showNoCreditsMessage = false;
 
 int main() 
 {
@@ -62,7 +60,6 @@ int main()
     machine_spin = LoadSound("assets/spin.mp3");
     SetTargetFPS(60);
     srand(static_cast<unsigned int>(time(0))); //starting value 0, this seeds rand and helps generate random numbers. supposedly not efficient but i do not care right now
-
 
     while (!WindowShouldClose()) //check if KEY_ESCAPE pressed or windows close icon clicked
     {
@@ -83,14 +80,20 @@ int main()
             DrawText(TextFormat("%d", slotValues[i]), x, 280, 40, GREEN);
         }
 
-        if (IsKeyPressed(KEY_SPACE) && credits >= 5) {
-            credits -= 5;
-            PlaySound(machine_spin);
-            runSlot(credits);
+        if (IsKeyPressed(KEY_SPACE)){
 
+            if (credits >= 5) {
+                credits -= 5;
+                PlaySound(machine_spin);
+                runSlot(credits);
+                showNoCreditsMessage = false;
+            }
+            else {
+                showNoCreditsMessage = true;
+            }
         }
-        if (IsKeyPressed(KEY_SPACE) && credits < 5) {
-            BeginDrawing();
+
+        if (showNoCreditsMessage) {
             DrawText("No credits left.", 20, 335, 24, RED);
         }
 
