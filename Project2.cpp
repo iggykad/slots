@@ -81,7 +81,11 @@ void LoadAppleFrames() {
 
 int main() {
 
+    
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Slot Machine");
+    Image icon = LoadImage("assets/pause_apple/frame_00.png");
+    SetWindowIcon(icon);
+    UnloadImage(icon);
     InitAudioDevice();
 
     twenty_one = LoadSound("assets/twentyone.mp3");
@@ -141,7 +145,19 @@ int main() {
                 (SCREEN_WIDTH - 250) / 2,
                 (SCREEN_HEIGHT - 300) / 2,
                 WHITE);
+
+            if (!IsSoundPlaying(pause_sound)) {
+                PlaySound(pause_sound);
+            }
+
             DrawText("PAUSED", CenterX("PAUSED", 50), 475, 50, RED);
+            DrawText("q to exit", 365, 525, 20, WHITE);
+            DrawText("p to unpause", 350, 550, 20, WHITE);
+
+            if (IsKeyPressed(KEY_Q)) {
+                CloseWindow();
+            }
+
         }
 
         EndDrawing();
@@ -150,6 +166,7 @@ int main() {
             Paused = !Paused;
             if (Paused) PlaySound(pause_sound);
             else StopSound(pause_sound);
+            
         }
 
         if (IsKeyPressed(KEY_SPACE) && !Paused) { //if you spin when unpaused/while pause function is not called
