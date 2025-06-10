@@ -16,11 +16,12 @@ int credits = 50;
 bool spinning = false;
 std::vector<int> slotValues(3);
 std::string message = "";
+float loadingProgress = 0.0f;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
-// Apple animation frames for pause screen
+// apple frames for pause screen
 std::vector<Texture2D> appleFrames;
 int currentFrame = 0;
 float frameTimer = 0;
@@ -60,7 +61,7 @@ void runSlot(int& credits)
     }
 }
 
-//in the assets dir there's a folder with all the frames of the pause screen apple gif, void func loads them
+//in the assets directory there's a subfolder with all the frames of the pause screen apple gif, this function loads each frame. 
 void LoadAppleFrames() {
     appleFrames.clear();
     for (int i = 0; i <= 58; i += 2) {
@@ -97,8 +98,8 @@ int main() {
     credit_sound = LoadSound("assets/credits.mp3");
     jackpot = LoadSound("assets/jackpot.mp3");
     startup = LoadSound("assets/ps3.mp3");
-    if (FileExists("assets/pause.mp3")) {
-        pause_sound = LoadSound("assets/pause.mp3");
+    if (FileExists("assets/pause.mp3")) {            //might not need
+        pause_sound = LoadSound("assets/pause.mp3"); //these two lines checking if the file exists since they're directly in /assets
     }
     machine_spin = LoadSound("assets/spin.mp3");
 
@@ -121,9 +122,11 @@ int main() {
             currentFrame = (currentFrame + 1) % appleFrames.size();
         }
 
+        loadingProgress = (float)((GetTime() - loadingStart) / 9.0);
+        if (loadingProgress > 1.0f) loadingProgress = 1.0f;
+
         BeginDrawing();
         ClearBackground(SKYBLUE);
-
 
         if (!appleFrames.empty()) {
             DrawTexture(appleFrames[currentFrame],
@@ -132,10 +135,14 @@ int main() {
                 WHITE);
         }
 
+        DrawRectangle(SCREEN_WIDTH / 4, SCREEN_HEIGHT - 100, SCREEN_WIDTH / 2, 20, DARKGRAY);
+        DrawRectangle(SCREEN_WIDTH / 4, SCREEN_HEIGHT - 100, (int)(SCREEN_WIDTH / 2 * loadingProgress), 20, LIME);
+        DrawText("Loading...", CenterX("Loading...", 20), SCREEN_HEIGHT - 130, 20, BLACK);
+
         EndDrawing();
     }
 
-    //======================================
+    //===============================================
 
     bool running = true;
 
@@ -215,21 +222,21 @@ int main() {
 
         EndDrawing();
 
-        if (IsKeyPressed(KEY_SPACE) && !Paused) { //if you spin when unpaused/while pause function is not called
+        if (IsKeyPressed(KEY_SPACE) && !Paused) { //if you spin while unpaused
             if (credits >= 5) {
                 credits -= 5;
                 PlaySound(machine_spin);
                 runSlot(credits);
                 showNoCreditsMessage = false;
             }
-            else {
+            else { //only for nest, in this case you are already unpaused
                 showNoCreditsMessage = true;
             }
         }
     }
 
     for (auto& frame : appleFrames) {
-        UnloadTexture(frame);
+        UnloadTexture(frame); // each frame in appleFrames is properly unloaded, prevents GPU overload and unused allocated memory leaks
     }
 
     UnloadSound(credit_sound);
