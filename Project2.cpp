@@ -3,22 +3,24 @@
 #include <ctime>
 #include <vector>
 #include <string>
-#include <chrono>
-#include <thread>
 
-int credits = 50;
-bool spinning = false;
-std::vector<int> slotValues(3);
-std::string message = "";
+// Your sounds
 Sound credit_sound;
 Sound jackpot;
 Sound twenty_one;
 Sound pause_sound;
 Sound machine_spin;
+Sound startup;
+
+int credits = 50;
+bool spinning = false;
+std::vector<int> slotValues(3);
+std::string message = "";
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
+// Apple animation frames for pause screen
 std::vector<Texture2D> appleFrames;
 int currentFrame = 0;
 float frameTimer = 0;
@@ -30,7 +32,7 @@ int CenterX(const char* text, int fontSize) {
     return (GetScreenWidth() - MeasureText(text, fontSize)) / 2;
 }
 
-void runSlot(int& credits) 
+void runSlot(int& credits)
 {
     slotValues[0] = rand() % 22;
     slotValues[1] = rand() % 22;
@@ -62,7 +64,7 @@ void runSlot(int& credits)
 void LoadAppleFrames() {
     appleFrames.clear();
     for (int i = 0; i <= 58; i += 2) {
-        std::string path = TextFormat("assets/pause_apple/frame_%02d.png", i);
+        std::string path = TextFormat("assets/frame_%02d.png", i);
         if (FileExists(path.c_str())) {
             Image img = LoadImage(path.c_str());
             if (img.data != NULL) {
@@ -73,25 +75,31 @@ void LoadAppleFrames() {
                 }
             }
         }
-    }
-    if (appleFrames.empty()) {
-        TraceLog(LOG_ERROR, "Failed to load frames!");
+        else {
+            TraceLog(LOG_WARNING, "Missing frame: %s", path.c_str());
+        }
     }
 }
 
 int main() {
 
-    
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Slot Machine");
-    Image icon = LoadImage("assets/pause_apple/frame_00.png");
+    Image icon = LoadImage("assets/frame_00.png");
     SetWindowIcon(icon);
     UnloadImage(icon);
     InitAudioDevice();
 
+    if (!IsAudioDeviceReady()) {
+        return -1;
+    }
+
     twenty_one = LoadSound("assets/twentyone.mp3");
     credit_sound = LoadSound("assets/credits.mp3");
     jackpot = LoadSound("assets/jackpot.mp3");
-    pause_sound = LoadSound("assets/pause.mp3");
+    startup = LoadSound("assets/ps3.mp3");
+    if (FileExists("assets/pause.mp3")) {
+        pause_sound = LoadSound("assets/pause.mp3");
+    }
     machine_spin = LoadSound("assets/spin.mp3");
 
     LoadAppleFrames(); //loads the apple frames, prepares them to appear when the function is called
@@ -99,18 +107,56 @@ int main() {
     SetTargetFPS(60);
     srand(static_cast<unsigned int>(time(0)));
 
-    while (!WindowShouldClose()) //i changed around the order so that int, any text at the top of the window is at the start and the rest is accordingly written out
+    //loading screen where the april spins
+
+    double loadingStart = GetTime();
+
+    PlaySound(startup);
+
+    while (GetTime() - loadingStart < 9.0)
     {
-        if (Paused) {
-            frameTimer += GetFrameTime();
-            if (frameTimer >= frameDelay) {
-                frameTimer = 0;
-                currentFrame = (currentFrame + 1) % appleFrames.size();
+        frameTimer += GetFrameTime();
+        if (frameTimer >= frameDelay) {
+            frameTimer = 0;
+            currentFrame = (currentFrame + 1) % appleFrames.size();
+        }
+
+        BeginDrawing();
+        ClearBackground(SKYBLUE);
+
+
+        if (!appleFrames.empty()) {
+            DrawTexture(appleFrames[currentFrame],
+                (SCREEN_WIDTH - 250) / 2,
+                (SCREEN_HEIGHT - 300) / 2,
+                WHITE);
+        }
+
+        EndDrawing();
+    }
+
+    //======================================
+
+    bool running = true;
+
+    while (running && !WindowShouldClose())
+    {
+        // Handle pause toggle key
+        if (IsKeyPressed(KEY_P)) {
+            Paused = !Paused;
+            if (Paused) {
+                currentFrame = 0;    // reset animation frame
+                frameTimer = 0;      // reset timer
+                PlaySound(pause_sound);
+            }
+            else {
+                StopSound(pause_sound);
             }
         }
 
         BeginDrawing();
         ClearBackground(BLACK);
+
         DrawText("Rules:", 20, 80, 20, WHITE);
         DrawText("Hit 21: +10", 20, 110, 18, WHITE);
         DrawText("Hit 7: +100", 20, 130, 18, WHITE);
@@ -125,7 +171,6 @@ int main() {
         for (int i = 0; i < 3; i++) {
             DrawText(TextFormat("%d", slotValues[i]), slotStartX + (i * 100), 280, 40, GREEN);
         }
-        //------------------------------------------------
 
         if (!message.empty()) {
             DrawText(message.c_str(), CenterX(message.c_str(), 20), 400, 20, GOLD);
@@ -139,35 +184,36 @@ int main() {
         DrawText("Press [P] to Pause", CenterX("Press [P] to Pause", 20), 550, 20, GRAY);
 
         if (Paused) {
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color{ 0, 0, 0, 180 });
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GRAY);
 
-            DrawTexture(appleFrames[currentFrame],
-                (SCREEN_WIDTH - 250) / 2,
-                (SCREEN_HEIGHT - 300) / 2,
-                WHITE);
+            if (!appleFrames.empty()) {
+                
+                frameTimer += GetFrameTime();
+                if (frameTimer >= frameDelay) {
+                    frameTimer = 0;
+                    currentFrame = (currentFrame + 1) % appleFrames.size();
+                }
+
+                DrawTexture(appleFrames[currentFrame],
+                    (SCREEN_WIDTH - 250) / 2,
+                    (SCREEN_HEIGHT - 300) / 2,
+                    WHITE);
+            }
 
             if (!IsSoundPlaying(pause_sound)) {
                 PlaySound(pause_sound);
             }
 
             DrawText("PAUSED", CenterX("PAUSED", 50), 475, 50, RED);
-            DrawText("q to exit", 365, 525, 20, WHITE);
-            DrawText("p to unpause", 350, 550, 20, WHITE);
+            DrawText("q to exit", 335, 525, 20, WHITE);
+            DrawText("p to unpause", 335, 550, 20, WHITE);
 
             if (IsKeyPressed(KEY_Q)) {
-                CloseWindow();
+                running = false;  //exit main 
             }
-
         }
 
         EndDrawing();
-
-        if (IsKeyPressed(KEY_P)) {
-            Paused = !Paused;
-            if (Paused) PlaySound(pause_sound);
-            else StopSound(pause_sound);
-            
-        }
 
         if (IsKeyPressed(KEY_SPACE) && !Paused) { //if you spin when unpaused/while pause function is not called
             if (credits >= 5) {
